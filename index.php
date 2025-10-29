@@ -6,7 +6,7 @@
  * Description: 适用于WordPress子比主题的RESTAPI扩展插件
  * Version: 1.0.0
  * Author: 鼠子
- * Author URI: https://space.bilibili.com/435502585
+ * Author URI: https://github.com/YuiNijika
  */
 
 if (!defined('ABSPATH')) exit;

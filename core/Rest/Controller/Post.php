@@ -31,12 +31,16 @@ class PostController extends RestController
      */
     public function get_posts($request) {
         if (!Zibll_RESTAPI::get_option('enable_get_post', true)) {
-            return $this->error_response('文章API已禁用', HttpCode::FORBIDDEN);
+            return $this->error_response(
+                '文章API已禁用', HttpCode::FORBIDDEN
+            );
         }
         
         $allowed_scenarios = Zibll_RESTAPI::get_option('enable_get_post_detail', ['1']);
         if (!in_array('1', $allowed_scenarios)) {
-            return $this->error_response('文章列表功能已禁用', HttpCode::FORBIDDEN);
+            return $this->error_response(
+                '文章列表功能已禁用', HttpCode::FORBIDDEN
+            );
         }
         
         $params = $request->get_params();
@@ -51,10 +55,12 @@ class PostController extends RestController
         $formatted_posts = [];
         
         foreach ($posts as $post) {
-            $formatted_posts[] = $this->format_post($post);
+            $formatted_posts[] = $this->format_post_list($post);
         }
         
-        return $this->success_response($formatted_posts, '文章列表获取成功');
+        return $this->success_response(
+            $formatted_posts, '文章列表获取成功'
+        );
     }
     
     /**
@@ -62,28 +68,50 @@ class PostController extends RestController
      */
     public function get_post($request) {
         if (!Zibll_RESTAPI::get_option('enable_get_post', true)) {
-            return $this->error_response('文章API已禁用', HttpCode::FORBIDDEN);
+            return $this->error_response(
+                '文章API已禁用', HttpCode::FORBIDDEN
+            );
         }
 
         $allowed_scenarios = Zibll_RESTAPI::get_option('enable_get_post_detail', ['1']);
         if (!in_array('2', $allowed_scenarios)) {
-            return $this->error_response('文章详情功能已禁用', HttpCode::FORBIDDEN);
+            return $this->error_response(
+                '文章详情功能已禁用', HttpCode::FORBIDDEN
+            );
         }
         
         $post_id = $request->get_param('id');
         $post = get_post($post_id);
         
         if (!$post || $post->post_status !== 'publish') {
-            return $this->error_response('文章未找到', HttpCode::NOT_FOUND);
+            return $this->error_response(
+                '文章未找到', HttpCode::NOT_FOUND
+            );
         }
         
-        return $this->success_response($this->format_post($post), '文章详情获取成功');
+        return $this->success_response(
+            $this->format_post_detail($post), '文章详情获取成功'
+        );
     }
     
     /**
-     * 格式化文章数据
+     * 格式化文章列表数据
      */
-    private function format_post($post) {
+    private function format_post_list($post) {
+        return [
+            'id' => $post->ID,
+            'title' => $post->post_title,
+            'excerpt' => $post->post_excerpt,
+            'date' => $post->post_date,
+            'modified' => $post->post_modified,
+            'slug' => $post->post_name,
+            'author' => get_the_author_meta('display_name', $post->post_author),
+            'categories' => wp_get_post_categories($post->ID, ['fields' => 'names']),
+            'tags' => wp_get_post_tags($post->ID, ['fields' => 'names']),
+        ];
+    }
+    
+    private function format_post_detail($post) {
         return [
             'id' => $post->ID,
             'title' => $post->post_title,
@@ -95,9 +123,14 @@ class PostController extends RestController
             'author' => get_the_author_meta('display_name', $post->post_author),
             'categories' => wp_get_post_categories($post->ID, ['fields' => 'names']),
             'tags' => wp_get_post_tags($post->ID, ['fields' => 'names']),
+            'comment_count' => $post->comment_count,
+            'comment_status' => $post->comment_status,
+            'ping_status' => $post->ping_status,
+            'guid' => $post->guid,
+            'type' => $post->post_type,
+            'status' => $post->post_status,
         ];
     }
 }
 
-// 注册控制器
 Zibll_RESTAPI_Router::register_controller('PostController');

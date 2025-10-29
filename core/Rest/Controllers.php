@@ -46,8 +46,8 @@ class RestController
         return new WP_REST_Response([
             'code' => HttpCode::OK->value,
             'message' => $message,
-            'data' => $data,
-            'timestamp' => time()
+            'timestamp' => time(),
+            'data' => $data
         ], HttpCode::OK->value);
     }
 
