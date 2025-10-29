@@ -58,8 +58,8 @@ class RestController
     {
         return new WP_REST_Response([
             'code' => $code->value,
-            'message' => $message,
-            'timestamp' => time()
+            'timestamp' => time(),
+            'message' => $message
         ], $code->value);
     }
 }
